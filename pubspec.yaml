@@ -1,0 +1,11 @@
+name: gm
+description: A simple and fast math library for Dart, inspired by WGSL conventions.
+version: 0.0.1
+repository: https://github.com/dartgfx/gm
+
+environment:
+  sdk: ^3.3.0
+
+dev_dependencies:
+  benchmark_harness: ^2.3.0
+  vector_math: ^2.1.4
