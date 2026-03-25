@@ -1,15 +1,6 @@
 # gm
 
-A simple and fast math library for Dart, inspired by [WGSL](https://www.w3.org/TR/WGSL/) conventions.
-
-## Features
-
-- **Vectors** — `vec2`, `vec3`, `vec4` (float), `vec2i/3i/4i` (int), `vec2u/3u/4u` (uint), `vec2b/3b/4b` (bool)
-- **Matrices** — all 9 WGSL types (`mat2x2` through `mat4x4`, including non-square), column-major layout
-- **Quaternions** — `quat` with slerp, axis-angle, euler, and matrix conversion
-- **Scalars** — `f32`, `i32`, `u32` extension types 
-- **WGSL built-in functions** — `dot`, `cross`, `normalize`, `length`, `mix`, `clamp`, `smoothstep`, `reflect`, `sin`, `cos`, `pow`, `sqrt`, `abs`, `sign`, `floor`, `ceil`, `step`, `select`, and more
-- **Swizzling** — `v.xy`, `v.zyx`, `v.rgb`, `v.wzyx`
+WGSL-style math library for Dart. Vectors, matrices, quaternions, and all the WGSL built-in functions.
 
 ## Usage
 
@@ -23,6 +14,9 @@ final c = a + b;           // vec3(5, 7, 9)
 final d = dot(a, b);       // 32.0
 final n = normalize(a);    // unit length
 final r = cross(a, b);     // perpendicular
+
+// Scalar multiply/divide
+final scaled = a * 2.0;    // vec3(2, 4, 6)
 
 // Matrices
 final view = mat4x4.lookAt(
@@ -49,52 +43,67 @@ final s = smoothstep(0.0, 1.0, 0.5);     // 0.5
 final clamped = clamp(vec3(-1, 2, 0.5), vec3.zero, vec3(1, 1, 1));
 ```
 
+## What's in the box
+
+**Vectors** — `vec2`, `vec3`, `vec4` (float), `vec2i/3i/4i` (int), `vec2u/3u/4u` (uint), `vec2b/3b/4b` (bool). Indexing, swizzling (`v.xy`, `v.zyx`, `v.rgb`), component replacement (`v.withX(5)`).
+
+**Matrices** — all 9 WGSL types (`mat2x2` through `mat4x4`, including non-square), column-major.
+
+**Quaternions** — `quat` with slerp, axis-angle, euler, and matrix conversion.
+
+**Scalars** — `f32`, `i32`, `u32` extension types.
+
+**WGSL built-in functions** — `dot`, `cross`, `normalize`, `length`, `mix`, `clamp`, `smoothstep`, `reflect`, `sin`, `cos`, `pow`, `sqrt`, `abs`, `sign`, `floor`, `ceil`, `step`, `select`, and more.
+
 ## Benchmark
 
-Compared against [vector_math](https://pub.dev/packages/vector_math) — the
-standard Dart math library. Each benchmark uses realistic, non-degenerate data
-(varying angles, positions, rotations).
+Compared against [vector_math](https://pub.dev/packages/vector_math) on Dart 3.11.1, Apple M4 Pro.
 
-| Benchmark | m | vector_math | Speedup |
+### JIT (`dart run`)
+
+| Benchmark | gm | vector_math | Speedup |
 |---|---|---|---|
-| Vec3 arithmetic | 8.7 us | 39.4 us | **4.5x** |
-| Vec3 functions | 43.9 us | 53.8 us | **1.2x** |
-| Vec3 batch update | 39.9 us | 28.9 us | 0.7x |
-| Mat4 multiply chain | 12.3 us | 21.6 us | **1.8x** |
-| Mat4 transform | 6.8 us | 33.5 us | **4.9x** |
-| Camera setup | 35.6 us | 88.7 us | **2.5x** |
-| Quaternion slerp | 215.5 us | 265.2 us | **1.2x** |
-| Quaternion rotate | 11.9 us | 40.6 us | **3.4x** |
+| Vec3 arithmetic | 8.7 us | 43.2 us | **5.0x** |
+| Vec3 functions | 21.6 us | 58.7 us | **2.7x** |
+| Vec3 batch update | 38.5 us | 27.9 us | 0.7x |
+| Mat4 multiply chain | 12.1 us | 21.2 us | **1.8x** |
+| Mat4 transform | 6.7 us | 33.2 us | **5.0x** |
+| Camera setup | 10.9 us | 87.2 us | **8.0x** |
+| Quaternion slerp | 166.2 us | 261.2 us | **1.6x** |
+| Quaternion rotate | 11.9 us | 39.6 us | **3.3x** |
 
-m wins **7 out of 8** categories (1.2x-4.9x faster). vector_math wins the
-batch update case where its in-place `addScaled` avoids allocations entirely.
+### AOT (`dart compile exe`)
+
+| Benchmark | gm | vector_math | Speedup |
+|---|---|---|---|
+| Vec3 arithmetic | 8.7 us | 42.4 us | **4.9x** |
+| Vec3 functions | 16.4 us | 55.3 us | **3.4x** |
+| Vec3 batch update | 39.7 us | 25.3 us | 0.6x |
+| Mat4 multiply chain | 3.6 us | 20.6 us | **5.7x** |
+| Mat4 transform | 7.0 us | 50.8 us | **7.3x** |
+| Camera setup | 5.8 us | 87.0 us | **15.0x** |
+| Quaternion slerp | 176.7 us | 216.3 us | **1.2x** |
+| Quaternion rotate | 14.1 us | 45.9 us | **3.3x** |
+
+gm wins 7 out of 8 in both modes. AOT benefits more from inline pragmas. vector_math wins batch update where its in-place `addScaled` avoids allocations.
 
 ### GC pressure
 
-Measured with `dart --verbose-gc`, counting only the `main` isolate.
+Measured with `dart --verbose-gc`, main isolate only.
 
-| Benchmark | m GCs | vm GCs |
+| Benchmark | gm GCs | vm GCs |
 |---|---|---|
-| Vec3 arithmetic | 2 | 2 |
-| Vec3 functions | 8,175 | 3 |
-| Vec3 batch update | 9,053 | 1 |
-| Mat4 multiply chain | 15 | 2 |
-| Mat4 transform | 2 | 2 |
-| Camera setup | 9,789 | 5,465 |
-| Quaternion slerp | 2,699 | 3,161 |
-| Quaternion rotate | 2 | 2 |
+| Vec3 arithmetic | 1 | 0 |
+| Vec3 functions | 0 | 0 |
+| Vec3 batch update | 219 | 0 |
+| Mat4 multiply chain | 0 | 0 |
+| Mat4 transform | 0 | 0 |
+| Camera setup | 143 | 0 |
+| Quaternion slerp | 169 | 0 |
+| Quaternion rotate | 1 | 0 |
 
-Immutable types allocate more intermediates — vec3 functions and batch update
-show thousands of young-gen scavenges.
+gm uses immutable values (plain `final double` fields, no `Float32List` backing) with inline pragmas that let the Dart VM scalar-replace intermediates. Batch update and camera setup still allocate, the rest produce zero GC.
 
-**Design tradeoff**: m uses immutable values (plain `final double` fields, no
-`Float32List` backing). This gives the Dart VM more optimization room for
-compute-and-discard patterns (transforms, projections, rotations) where m is
-2-5x faster with negligible GC. Mutable libraries win tight update loops that
-modify the same vector thousands of times per frame.
-
-Run the benchmark yourself:
 ```
 dart benchmark/vs_vector_math.dart
 ```
-

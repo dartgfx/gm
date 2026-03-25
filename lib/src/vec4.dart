@@ -6,11 +6,16 @@ final class vec4 extends vecf {
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
   const vec4(this.x, [double? y, double? z, double? w])
-    : y = y ?? x,
-      z = z ?? x,
-      w = w ?? x;
+      : y = y ?? x,
+        z = z ?? x,
+        w = w ?? x;
 
   static const zero = vec4(0, 0, 0, 0);
+  static const one = vec4(1, 1, 1, 1);
+  static const unitX = vec4(1, 0, 0, 0);
+  static const unitY = vec4(0, 1, 0, 0);
+  static const unitZ = vec4(0, 0, 1, 0);
+  static const unitW = vec4(0, 0, 0, 1);
 
   final double x, y, z, w;
 
@@ -40,28 +45,42 @@ final class vec4 extends vecf {
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  vec4 operator *(vec4 other) =>
-      vec4(x * other.x, y * other.y, z * other.z, w * other.w);
+  vec4 operator *(Object o) => switch (o) {
+        vec4 v => vec4(x * v.x, y * v.y, z * v.z, w * v.w),
+        double s => vec4(x * s, y * s, z * s, w * s),
+        int s => vec4(x * s, y * s, z * s, w * s),
+        _ => throw ArgumentError('vec4 * ${o.runtimeType}'),
+      };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  vec4 operator /(vec4 other) =>
-      vec4(x / other.x, y / other.y, z / other.z, w / other.w);
+  vec4 operator /(Object o) => switch (o) {
+        vec4 v => vec4(x / v.x, y / v.y, z / v.z, w / v.w),
+        double s => vec4(x / s, y / s, z / s, w / s),
+        int s => vec4(x / s, y / s, z / s, w / s),
+        _ => throw ArgumentError('vec4 / ${o.runtimeType}'),
+      };
 
   @override
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  double get magnitude => math.sqrt(x * x + y * y + z * z + w * w);
+  double get length => math.sqrt(x * x + y * y + z * z + w * w);
+
+  @override
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  double get lengthSquared => x * x + y * y + z * z + w * w;
 
   @override
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
   vec4 get normalized {
-    final l = math.sqrt(x * x + y * y + z * z + w * w);
-    return l == 0 ? vec4.zero : vec4(x / l, y / l, z / l, w / l);
+    final invL = _safeInv(math.sqrt(x * x + y * y + z * z + w * w));
+    return vec4(x * invL, y * invL, z * invL, w * invL);
   }
 
   @override
@@ -116,22 +135,81 @@ final class vec4 extends vecf {
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
   vec4 mixWithVec(vec4 other, vec4 t) => vec4(
-    x * (1.0 - t.x) + other.x * t.x,
-    y * (1.0 - t.y) + other.y * t.y,
-    z * (1.0 - t.z) + other.z * t.z,
-    w * (1.0 - t.w) + other.w * t.w,
-  );
+        x * (1.0 - t.x) + other.x * t.x,
+        y * (1.0 - t.y) + other.y * t.y,
+        z * (1.0 - t.z) + other.z * t.z,
+        w * (1.0 - t.w) + other.w * t.w,
+      );
 
   @override
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
   vec4 smoothstepWith(vec4 e0, vec4 e1) => vec4(
-    _ss(x, e0.x, e1.x),
-    _ss(y, e0.y, e1.y),
-    _ss(z, e0.z, e1.z),
-    _ss(w, e0.w, e1.w),
-  );
+        _ss(x, e0.x, e1.x),
+        _ss(y, e0.y, e1.y),
+        _ss(z, e0.z, e1.z),
+        _ss(w, e0.w, e1.w),
+      );
+
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  double operator [](int i) => switch (i) {
+        0 => x,
+        1 => y,
+        2 => z,
+        3 => w,
+        _ => throw RangeError.index(i, this, 'i', null, 4),
+      };
+
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  vec4 withX(double v) => vec4(v, y, z, w);
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  vec4 withY(double v) => vec4(x, v, z, w);
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  vec4 withZ(double v) => vec4(x, y, v, w);
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  vec4 withW(double v) => vec4(x, y, z, v);
+
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  vec4 normalizedOr(vec4 fallback) {
+    final ls = x * x + y * y + z * z + w * w;
+    if (ls < 1e-20) return fallback;
+    final invL = 1.0 / math.sqrt(ls);
+    return vec4(x * invL, y * invL, z * invL, w * invL);
+  }
+
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  bool isNearZero([double eps = 1e-10]) =>
+      x * x + y * y + z * z + w * w < eps * eps;
+
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  double get minComponent => math.min(x, math.min(y, math.min(z, w)));
+
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  double get maxComponent => math.max(x, math.max(y, math.max(z, w)));
+
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  vec4 get reciprocal => vec4(1.0 / x, 1.0 / y, 1.0 / z, 1.0 / w);
 
   @override
   bool operator ==(Object other) =>
@@ -145,4 +223,7 @@ final class vec4 extends vecf {
   int get hashCode => x.hashCode ^ y.hashCode ^ z.hashCode ^ w.hashCode;
 
   String get display => 'vec4($x, $y, $z, $w)';
+
+  @override
+  String toString() => display;
 }

@@ -176,7 +176,7 @@ class Vec3FuncsM extends BenchmarkBase {
       final norm = v.normalized;
       final d = v.dotWith(n);
       final c = m.cross(v, n);
-      final l = v.magnitude;
+      final l = v.length;
       final r = v.reflectOn(n);
       _sink += norm.x + d + c.y + l + r.z;
     }

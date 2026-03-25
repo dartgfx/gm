@@ -44,12 +44,12 @@ final class quat {
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  double get magnitudeSquared => x * x + y * y + z * z + w * w;
+  double get lengthSquared => x * x + y * y + z * z + w * w;
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  double get magnitude => math.sqrt(x * x + y * y + z * z + w * w);
+  double get length => math.sqrt(x * x + y * y + z * z + w * w);
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
@@ -77,11 +77,11 @@ final class quat {
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
   quat operator *(quat o) => quat(
-    w * o.x + x * o.w + y * o.z - z * o.y,
-    w * o.y - x * o.z + y * o.w + z * o.x,
-    w * o.z + x * o.y - y * o.x + z * o.w,
-    w * o.w - x * o.x - y * o.y - z * o.z,
-  );
+        w * o.x + x * o.w + y * o.z - z * o.y,
+        w * o.y - x * o.z + y * o.w + z * o.x,
+        w * o.z + x * o.y - y * o.x + z * o.w,
+        w * o.w - x * o.x - y * o.y - z * o.z,
+      );
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
@@ -108,6 +108,17 @@ final class quat {
   @pragma('dart2js:tryInline')
   double dotWith(quat o) => x * o.x + y * o.y + z * o.z + w * o.w;
 
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  vec3 get xyz => vec3(x, y, z);
+
+  /// Returns this quaternion with w >= 0 (canonical form).
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  quat get ensureWPositive => w < 0 ? quat(-x, -y, -z, -w) : this;
+
   /// Rotates a vec3 by this quaternion: q * v * q⁻¹ (optimized).
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
@@ -125,7 +136,42 @@ final class quat {
     );
   }
 
+  /// Inverse-rotates a vec3: q⁻¹ * v * q (optimized via conjugate).
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  vec3 inverseRotate(vec3 v) {
+    // conjugate: negate xyz
+    final qx = -x, qy = -y, qz = -z;
+    final tx = 2.0 * (qy * v.z - qz * v.y);
+    final ty = 2.0 * (qz * v.x - qx * v.z);
+    final tz = 2.0 * (qx * v.y - qy * v.x);
+    return vec3(
+      v.x + w * tx + (qy * tz - qz * ty),
+      v.y + w * ty + (qz * tx - qx * tz),
+      v.z + w * tz + (qx * ty - qy * tx),
+    );
+  }
+
+  /// Extracts axis and angle. Returns (axis, angle) where angle is in [0, 2π).
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  (vec3, double) toAxisAngle() {
+    final q = w < 0 ? quat(-x, -y, -z, -w) : this;
+    final sinHalf = math.sqrt(q.x * q.x + q.y * q.y + q.z * q.z);
+    if (sinHalf < 1e-10) return (vec3.unitX, 0.0);
+    final invS = 1.0 / sinHalf;
+    return (
+      vec3(q.x * invS, q.y * invS, q.z * invS),
+      2.0 * math.atan2(sinHalf, q.w)
+    );
+  }
+
   /// Converts to a 3x3 rotation matrix.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   mat3x3 toMat3() {
     final x2 = x + x, y2 = y + y, z2 = z + z;
     final xx = x * x2, xy = x * y2, xz = x * z2;
@@ -139,6 +185,9 @@ final class quat {
   }
 
   /// Converts to a 4x4 rotation matrix (translation = 0).
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   mat4x4 toMat4() {
     final x2 = x + x, y2 = y + y, z2 = z + z;
     final xx = x * x2, xy = x * y2, xz = x * z2;
@@ -153,6 +202,9 @@ final class quat {
   }
 
   /// Spherical linear interpolation. Takes the shortest path.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   quat slerp(quat other, double t) {
     var d = x * other.x + y * other.y + z * other.z + w * other.w;
     var ox = other.x, oy = other.y, oz = other.z, ow = other.w;
@@ -188,6 +240,59 @@ final class quat {
     );
   }
 
+  /// Normalized linear interpolation. Cheaper than slerp, good enough for most uses.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  quat nlerp(quat other, double t) {
+    var ox = other.x, oy = other.y, oz = other.z, ow = other.w;
+    // Shortest path
+    if (x * ox + y * oy + z * oz + w * ow < 0) {
+      ox = -ox;
+      oy = -oy;
+      oz = -oz;
+      ow = -ow;
+    }
+    final s = 1.0 - t;
+    final rx = s * x + t * ox;
+    final ry = s * y + t * oy;
+    final rz = s * z + t * oz;
+    final rw = s * w + t * ow;
+    final invL = 1.0 / math.sqrt(rx * rx + ry * ry + rz * rz + rw * rw);
+    return quat(rx * invL, ry * invL, rz * invL, rw * invL);
+  }
+
+  /// Shortest-arc rotation from direction [a] to direction [b].
+  /// Both must be normalized.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  static quat fromTo(vec3 a, vec3 b) {
+    final d = a.x * b.x + a.y * b.y + a.z * b.z;
+    if (d > 0.9999) return identity;
+    if (d < -0.9999) {
+      // 180° — pick arbitrary perpendicular axis
+      var perp = vec3(1, 0, 0);
+      if ((a.x).abs() > 0.9) perp = vec3(0, 1, 0);
+      final axis = vec3(
+        a.y * perp.z - a.z * perp.y,
+        a.z * perp.x - a.x * perp.z,
+        a.x * perp.y - a.y * perp.x,
+      ).normalized;
+      return quat(axis.x, axis.y, axis.z, 0);
+    }
+    // cross product
+    final cx = a.y * b.z - a.z * b.y;
+    final cy = a.z * b.x - a.x * b.z;
+    final cz = a.x * b.y - a.y * b.x;
+    final w = 1.0 + d;
+    final invL = 1.0 / math.sqrt(cx * cx + cy * cy + cz * cz + w * w);
+    return quat(cx * invL, cy * invL, cz * invL, w * invL);
+  }
+
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   static quat fromAxisAngle(vec3 axis, double angle) {
     final half = angle * 0.5;
     final s = math.sin(half);
@@ -219,6 +324,9 @@ final class quat {
   }
 
   /// Extract rotation quaternion from a pure rotation matrix.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   static quat fromMat3(mat3x3 m) {
     // Shepperd's method — numerically stable for all rotations.
     final trace = m.c0.x + m.c1.y + m.c2.z;
@@ -259,12 +367,15 @@ final class quat {
 
   /// Creates a quaternion from Euler angles (a, b, c) in the given [order].
   /// Composes Ri(a) * Rj(b) * Rk(c) where i, j, k are the axes of [order].
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   static quat fromEuler(double a, double b, double c, EulerOrder order) {
     quat axisQuat(int axis, double angle) => switch (axis) {
-      0 => fromRotationX(angle),
-      1 => fromRotationY(angle),
-      _ => fromRotationZ(angle),
-    };
+          0 => fromRotationX(angle),
+          1 => fromRotationY(angle),
+          _ => fromRotationZ(angle),
+        };
     return axisQuat(order._i, a) *
         axisQuat(order._j, b) *
         axisQuat(order._k, c);
@@ -272,6 +383,9 @@ final class quat {
 
   /// Extracts Euler angles (a, b, c) in the given [order].
   /// Returns a vec3 where x=a (first axis), y=b (second axis), z=c (third axis).
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   vec3 toEuler(EulerOrder order) {
     final m = toMat3();
     final i = order._i, j = order._j, k = order._k;
@@ -307,4 +421,7 @@ final class quat {
   int get hashCode => x.hashCode ^ y.hashCode ^ z.hashCode ^ w.hashCode;
 
   String get display => 'quat($x, $y, $z, $w)';
+
+  @override
+  String toString() => display;
 }

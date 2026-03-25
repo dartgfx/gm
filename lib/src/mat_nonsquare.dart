@@ -60,6 +60,9 @@ final class mat2x3 extends mat {
   int get hashCode => c0.hashCode ^ c1.hashCode;
 
   String get display => 'mat2x3($c0, $c1)';
+
+  @override
+  String toString() => display;
 }
 
 /// 2x4 float matrix (2 columns of vec4).
@@ -121,6 +124,9 @@ final class mat2x4 extends mat {
   int get hashCode => c0.hashCode ^ c1.hashCode;
 
   String get display => 'mat2x4($c0, $c1)';
+
+  @override
+  String toString() => display;
 }
 
 /// 3x2 float matrix (3 columns of vec2).
@@ -179,6 +185,9 @@ final class mat3x2 extends mat {
   int get hashCode => c0.hashCode ^ c1.hashCode ^ c2.hashCode;
 
   String get display => 'mat3x2($c0, $c1, $c2)';
+
+  @override
+  String toString() => display;
 }
 
 /// 3x4 float matrix (3 columns of vec4).
@@ -241,6 +250,9 @@ final class mat3x4 extends mat {
   int get hashCode => c0.hashCode ^ c1.hashCode ^ c2.hashCode;
 
   String get display => 'mat3x4($c0, $c1, $c2)';
+
+  @override
+  String toString() => display;
 }
 
 /// 4x2 float matrix (4 columns of vec2).
@@ -300,6 +312,9 @@ final class mat4x2 extends mat {
   int get hashCode => c0.hashCode ^ c1.hashCode ^ c2.hashCode ^ c3.hashCode;
 
   String get display => 'mat4x2($c0, $c1, $c2, $c3)';
+
+  @override
+  String toString() => display;
 }
 
 /// 4x3 float matrix (4 columns of vec3).
@@ -361,4 +376,7 @@ final class mat4x3 extends mat {
   int get hashCode => c0.hashCode ^ c1.hashCode ^ c2.hashCode ^ c3.hashCode;
 
   String get display => 'mat4x3($c0, $c1, $c2, $c3)';
+
+  @override
+  String toString() => display;
 }

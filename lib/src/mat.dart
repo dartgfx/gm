@@ -27,10 +27,10 @@ final class mat2x2 extends mat {
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
   vec2 operator [](int index) => switch (index) {
-    0 => c0,
-    1 => c1,
-    _ => throw RangeError.index(index, this, 'index', null, 2),
-  };
+        0 => c0,
+        1 => c1,
+        _ => throw RangeError.index(index, this, 'index', null, 2),
+      };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
@@ -50,10 +50,15 @@ final class mat2x2 extends mat {
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  mat2x2 operator *(mat2x2 o) => mat2x2(
-    vec2(c0.x * o.c0.x + c1.x * o.c0.y, c0.y * o.c0.x + c1.y * o.c0.y),
-    vec2(c0.x * o.c1.x + c1.x * o.c1.y, c0.y * o.c1.x + c1.y * o.c1.y),
-  );
+  mat2x2 operator *(Object o) => switch (o) {
+        mat2x2 m => mat2x2(
+            vec2(c0.x * m.c0.x + c1.x * m.c0.y, c0.y * m.c0.x + c1.y * m.c0.y),
+            vec2(c0.x * m.c1.x + c1.x * m.c1.y, c0.y * m.c1.x + c1.y * m.c1.y),
+          ),
+        double s => mat2x2(c0 * s, c1 * s),
+        int s => mat2x2(c0 * s, c1 * s),
+        _ => throw ArgumentError('mat2x2 * ${o.runtimeType}'),
+      };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
@@ -61,10 +66,19 @@ final class mat2x2 extends mat {
   vec2 transform(vec2 v) =>
       vec2(c0.x * v.x + c1.x * v.y, c0.y * v.x + c1.y * v.y);
 
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   mat2x2 get transposed => mat2x2(vec2(c0.x, c1.x), vec2(c0.y, c1.y));
 
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   double get determinant => c0.x * c1.y - c1.x * c0.y;
 
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   mat2x2 get inversed {
     final det = determinant;
     final invDet = 1.0 / det;
@@ -82,6 +96,9 @@ final class mat2x2 extends mat {
   int get hashCode => c0.hashCode ^ c1.hashCode;
 
   String get display => 'mat2x2($c0, $c1)';
+
+  @override
+  String toString() => display;
 }
 
 /// 3x3 float matrix. Column-major, immutable, const-constructible.
@@ -100,11 +117,11 @@ final class mat3x3 extends mat {
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
   vec3 operator [](int index) => switch (index) {
-    0 => c0,
-    1 => c1,
-    2 => c2,
-    _ => throw RangeError.index(index, this, 'index', null, 3),
-  };
+        0 => c0,
+        1 => c1,
+        2 => c2,
+        _ => throw RangeError.index(index, this, 'index', null, 3),
+      };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
@@ -126,44 +143,58 @@ final class mat3x3 extends mat {
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  mat3x3 operator *(mat3x3 o) => mat3x3(
-    vec3(
-      c0.x * o.c0.x + c1.x * o.c0.y + c2.x * o.c0.z,
-      c0.y * o.c0.x + c1.y * o.c0.y + c2.y * o.c0.z,
-      c0.z * o.c0.x + c1.z * o.c0.y + c2.z * o.c0.z,
-    ),
-    vec3(
-      c0.x * o.c1.x + c1.x * o.c1.y + c2.x * o.c1.z,
-      c0.y * o.c1.x + c1.y * o.c1.y + c2.y * o.c1.z,
-      c0.z * o.c1.x + c1.z * o.c1.y + c2.z * o.c1.z,
-    ),
-    vec3(
-      c0.x * o.c2.x + c1.x * o.c2.y + c2.x * o.c2.z,
-      c0.y * o.c2.x + c1.y * o.c2.y + c2.y * o.c2.z,
-      c0.z * o.c2.x + c1.z * o.c2.y + c2.z * o.c2.z,
-    ),
-  );
+  mat3x3 operator *(Object o) => switch (o) {
+        mat3x3 m => mat3x3(
+            vec3(
+              c0.x * m.c0.x + c1.x * m.c0.y + c2.x * m.c0.z,
+              c0.y * m.c0.x + c1.y * m.c0.y + c2.y * m.c0.z,
+              c0.z * m.c0.x + c1.z * m.c0.y + c2.z * m.c0.z,
+            ),
+            vec3(
+              c0.x * m.c1.x + c1.x * m.c1.y + c2.x * m.c1.z,
+              c0.y * m.c1.x + c1.y * m.c1.y + c2.y * m.c1.z,
+              c0.z * m.c1.x + c1.z * m.c1.y + c2.z * m.c1.z,
+            ),
+            vec3(
+              c0.x * m.c2.x + c1.x * m.c2.y + c2.x * m.c2.z,
+              c0.y * m.c2.x + c1.y * m.c2.y + c2.y * m.c2.z,
+              c0.z * m.c2.x + c1.z * m.c2.y + c2.z * m.c2.z,
+            ),
+          ),
+        double s => mat3x3(c0 * s, c1 * s, c2 * s),
+        int s => mat3x3(c0 * s, c1 * s, c2 * s),
+        _ => throw ArgumentError('mat3x3 * ${o.runtimeType}'),
+      };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
   vec3 transform(vec3 v) => vec3(
-    c0.x * v.x + c1.x * v.y + c2.x * v.z,
-    c0.y * v.x + c1.y * v.y + c2.y * v.z,
-    c0.z * v.x + c1.z * v.y + c2.z * v.z,
-  );
+        c0.x * v.x + c1.x * v.y + c2.x * v.z,
+        c0.y * v.x + c1.y * v.y + c2.y * v.z,
+        c0.z * v.x + c1.z * v.y + c2.z * v.z,
+      );
 
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   mat3x3 get transposed => mat3x3(
-    vec3(c0.x, c1.x, c2.x),
-    vec3(c0.y, c1.y, c2.y),
-    vec3(c0.z, c1.z, c2.z),
-  );
+        vec3(c0.x, c1.x, c2.x),
+        vec3(c0.y, c1.y, c2.y),
+        vec3(c0.z, c1.z, c2.z),
+      );
 
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   double get determinant =>
       c0.x * (c1.y * c2.z - c2.y * c1.z) -
       c1.x * (c0.y * c2.z - c2.y * c0.z) +
       c2.x * (c0.y * c1.z - c1.y * c0.z);
 
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   mat3x3 get inversed {
     final det = determinant;
     final invDet = 1.0 / det;
@@ -194,6 +225,9 @@ final class mat3x3 extends mat {
   int get hashCode => c0.hashCode ^ c1.hashCode ^ c2.hashCode;
 
   String get display => 'mat3x3($c0, $c1, $c2)';
+
+  @override
+  String toString() => display;
 }
 
 /// 4x4 float matrix.
@@ -216,11 +250,11 @@ final class mat4x4 extends mat {
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
   factory mat4x4.fromColsArray(List<double> v, [int offset = 0]) => mat4x4(
-    vec4(v[offset], v[offset + 1], v[offset + 2], v[offset + 3]),
-    vec4(v[offset + 4], v[offset + 5], v[offset + 6], v[offset + 7]),
-    vec4(v[offset + 8], v[offset + 9], v[offset + 10], v[offset + 11]),
-    vec4(v[offset + 12], v[offset + 13], v[offset + 14], v[offset + 15]),
-  );
+        vec4(v[offset], v[offset + 1], v[offset + 2], v[offset + 3]),
+        vec4(v[offset + 4], v[offset + 5], v[offset + 6], v[offset + 7]),
+        vec4(v[offset + 8], v[offset + 9], v[offset + 10], v[offset + 11]),
+        vec4(v[offset + 12], v[offset + 13], v[offset + 14], v[offset + 15]),
+      );
 
   final vec4 c0, c1, c2, c3;
 
@@ -228,12 +262,12 @@ final class mat4x4 extends mat {
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
   vec4 operator [](int index) => switch (index) {
-    0 => c0,
-    1 => c1,
-    2 => c2,
-    3 => c3,
-    _ => throw RangeError.index(index, this, 'index', null, 4),
-  };
+        0 => c0,
+        1 => c1,
+        2 => c2,
+        3 => c3,
+        _ => throw RangeError.index(index, this, 'index', null, 4),
+      };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
@@ -255,53 +289,81 @@ final class mat4x4 extends mat {
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  mat4x4 operator *(mat4x4 o) {
-    // Each result column = this * o.column
-    return mat4x4(
-      vec4(
-        c0.x * o.c0.x + c1.x * o.c0.y + c2.x * o.c0.z + c3.x * o.c0.w,
-        c0.y * o.c0.x + c1.y * o.c0.y + c2.y * o.c0.z + c3.y * o.c0.w,
-        c0.z * o.c0.x + c1.z * o.c0.y + c2.z * o.c0.z + c3.z * o.c0.w,
-        c0.w * o.c0.x + c1.w * o.c0.y + c2.w * o.c0.z + c3.w * o.c0.w,
-      ),
-      vec4(
-        c0.x * o.c1.x + c1.x * o.c1.y + c2.x * o.c1.z + c3.x * o.c1.w,
-        c0.y * o.c1.x + c1.y * o.c1.y + c2.y * o.c1.z + c3.y * o.c1.w,
-        c0.z * o.c1.x + c1.z * o.c1.y + c2.z * o.c1.z + c3.z * o.c1.w,
-        c0.w * o.c1.x + c1.w * o.c1.y + c2.w * o.c1.z + c3.w * o.c1.w,
-      ),
-      vec4(
-        c0.x * o.c2.x + c1.x * o.c2.y + c2.x * o.c2.z + c3.x * o.c2.w,
-        c0.y * o.c2.x + c1.y * o.c2.y + c2.y * o.c2.z + c3.y * o.c2.w,
-        c0.z * o.c2.x + c1.z * o.c2.y + c2.z * o.c2.z + c3.z * o.c2.w,
-        c0.w * o.c2.x + c1.w * o.c2.y + c2.w * o.c2.z + c3.w * o.c2.w,
-      ),
-      vec4(
-        c0.x * o.c3.x + c1.x * o.c3.y + c2.x * o.c3.z + c3.x * o.c3.w,
-        c0.y * o.c3.x + c1.y * o.c3.y + c2.y * o.c3.z + c3.y * o.c3.w,
-        c0.z * o.c3.x + c1.z * o.c3.y + c2.z * o.c3.z + c3.z * o.c3.w,
-        c0.w * o.c3.x + c1.w * o.c3.y + c2.w * o.c3.z + c3.w * o.c3.w,
-      ),
-    );
-  }
+  mat4x4 operator *(Object o) => switch (o) {
+        mat4x4 m => mat4x4(
+            vec4(
+              c0.x * m.c0.x + c1.x * m.c0.y + c2.x * m.c0.z + c3.x * m.c0.w,
+              c0.y * m.c0.x + c1.y * m.c0.y + c2.y * m.c0.z + c3.y * m.c0.w,
+              c0.z * m.c0.x + c1.z * m.c0.y + c2.z * m.c0.z + c3.z * m.c0.w,
+              c0.w * m.c0.x + c1.w * m.c0.y + c2.w * m.c0.z + c3.w * m.c0.w,
+            ),
+            vec4(
+              c0.x * m.c1.x + c1.x * m.c1.y + c2.x * m.c1.z + c3.x * m.c1.w,
+              c0.y * m.c1.x + c1.y * m.c1.y + c2.y * m.c1.z + c3.y * m.c1.w,
+              c0.z * m.c1.x + c1.z * m.c1.y + c2.z * m.c1.z + c3.z * m.c1.w,
+              c0.w * m.c1.x + c1.w * m.c1.y + c2.w * m.c1.z + c3.w * m.c1.w,
+            ),
+            vec4(
+              c0.x * m.c2.x + c1.x * m.c2.y + c2.x * m.c2.z + c3.x * m.c2.w,
+              c0.y * m.c2.x + c1.y * m.c2.y + c2.y * m.c2.z + c3.y * m.c2.w,
+              c0.z * m.c2.x + c1.z * m.c2.y + c2.z * m.c2.z + c3.z * m.c2.w,
+              c0.w * m.c2.x + c1.w * m.c2.y + c2.w * m.c2.z + c3.w * m.c2.w,
+            ),
+            vec4(
+              c0.x * m.c3.x + c1.x * m.c3.y + c2.x * m.c3.z + c3.x * m.c3.w,
+              c0.y * m.c3.x + c1.y * m.c3.y + c2.y * m.c3.z + c3.y * m.c3.w,
+              c0.z * m.c3.x + c1.z * m.c3.y + c2.z * m.c3.z + c3.z * m.c3.w,
+              c0.w * m.c3.x + c1.w * m.c3.y + c2.w * m.c3.z + c3.w * m.c3.w,
+            ),
+          ),
+        double s => mat4x4(c0 * s, c1 * s, c2 * s, c3 * s),
+        int s => mat4x4(c0 * s, c1 * s, c2 * s, c3 * s),
+        _ => throw ArgumentError('mat4x4 * ${o.runtimeType}'),
+      };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
   vec4 transform(vec4 v) => vec4(
-    c0.x * v.x + c1.x * v.y + c2.x * v.z + c3.x * v.w,
-    c0.y * v.x + c1.y * v.y + c2.y * v.z + c3.y * v.w,
-    c0.z * v.x + c1.z * v.y + c2.z * v.z + c3.z * v.w,
-    c0.w * v.x + c1.w * v.y + c2.w * v.z + c3.w * v.w,
-  );
+        c0.x * v.x + c1.x * v.y + c2.x * v.z + c3.x * v.w,
+        c0.y * v.x + c1.y * v.y + c2.y * v.z + c3.y * v.w,
+        c0.z * v.x + c1.z * v.y + c2.z * v.z + c3.z * v.w,
+        c0.w * v.x + c1.w * v.y + c2.w * v.z + c3.w * v.w,
+      );
 
+  /// Transforms a 3D point (w=1): applies rotation, scale, and translation.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  vec3 transformPoint(vec3 v) => vec3(
+        c0.x * v.x + c1.x * v.y + c2.x * v.z + c3.x,
+        c0.y * v.x + c1.y * v.y + c2.y * v.z + c3.y,
+        c0.z * v.x + c1.z * v.y + c2.z * v.z + c3.z,
+      );
+
+  /// Transforms a 3D direction (w=0): applies rotation and scale only.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  vec3 transformDirection(vec3 v) => vec3(
+        c0.x * v.x + c1.x * v.y + c2.x * v.z,
+        c0.y * v.x + c1.y * v.y + c2.y * v.z,
+        c0.z * v.x + c1.z * v.y + c2.z * v.z,
+      );
+
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   mat4x4 get transposed => mat4x4(
-    vec4(c0.x, c1.x, c2.x, c3.x),
-    vec4(c0.y, c1.y, c2.y, c3.y),
-    vec4(c0.z, c1.z, c2.z, c3.z),
-    vec4(c0.w, c1.w, c2.w, c3.w),
-  );
+        vec4(c0.x, c1.x, c2.x, c3.x),
+        vec4(c0.y, c1.y, c2.y, c3.y),
+        vec4(c0.z, c1.z, c2.z, c3.z),
+        vec4(c0.w, c1.w, c2.w, c3.w),
+      );
 
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   double get determinant {
     final a00 = c0.x, a01 = c0.y, a02 = c0.z, a03 = c0.w;
     final a10 = c1.x, a11 = c1.y, a12 = c1.z, a13 = c1.w;
@@ -330,6 +392,9 @@ final class mat4x4 extends mat {
   }
 
   /// Decomposes an affine mat4 into translation, rotation, and scale.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   ({vec3 translation, quat rotation, vec3 scale}) get decomposed {
     final translation = vec3(c3.x, c3.y, c3.z);
 
@@ -339,8 +404,7 @@ final class mat4x4 extends mat {
     final sz = math.sqrt(c2.x * c2.x + c2.y * c2.y + c2.z * c2.z);
 
     // Negate sx if upper-left 3x3 determinant is negative (reflection).
-    final det3 =
-        c0.x * (c1.y * c2.z - c2.y * c1.z) -
+    final det3 = c0.x * (c1.y * c2.z - c2.y * c1.z) -
         c1.x * (c0.y * c2.z - c2.y * c0.z) +
         c2.x * (c0.y * c1.z - c1.y * c0.z);
     if (det3 < 0) sx = -sx;
@@ -362,6 +426,9 @@ final class mat4x4 extends mat {
     );
   }
 
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   mat4x4 get inversed {
     final a00 = c0.x, a01 = c0.y, a02 = c0.z, a03 = c0.w;
     final a10 = c1.x, a11 = c1.y, a12 = c1.z, a13 = c1.w;
@@ -381,8 +448,7 @@ final class mat4x4 extends mat {
     final b10 = a21 * a33 - a23 * a31;
     final b11 = a22 * a33 - a23 * a32;
 
-    final invDet =
-        1.0 /
+    final invDet = 1.0 /
         (b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06);
 
     return mat4x4(
@@ -413,6 +479,25 @@ final class mat4x4 extends mat {
     );
   }
 
+  /// Fast inverse for affine matrices (rotation + translation, no shear/scale).
+  /// Uses transposed 3x3 rotation and negated translation. Much cheaper than
+  /// full [inversed].
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  mat4x4 get inversedAffine {
+    // Transpose the upper-left 3x3
+    final tx = -(c0.x * c3.x + c0.y * c3.y + c0.z * c3.z);
+    final ty = -(c1.x * c3.x + c1.y * c3.y + c1.z * c3.z);
+    final tz = -(c2.x * c3.x + c2.y * c3.y + c2.z * c3.z);
+    return mat4x4(
+      vec4(c0.x, c1.x, c2.x, 0),
+      vec4(c0.y, c1.y, c2.y, 0),
+      vec4(c0.z, c1.z, c2.z, 0),
+      vec4(tx, ty, tz, 1),
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       other is mat4x4 &&
@@ -426,8 +511,14 @@ final class mat4x4 extends mat {
 
   String get display => 'mat4x4($c0, $c1, $c2, $c3)';
 
+  @override
+  String toString() => display;
+
   /// Perspective projection (right-handed, depth [0, 1]).
   /// [fovY] is vertical field of view in radians.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   static mat4x4 perspective({
     required double fovY,
     required double aspect,
@@ -446,6 +537,9 @@ final class mat4x4 extends mat {
 
   /// Infinite perspective projection (right-handed, depth [0, 1]).
   /// Far plane at infinity — useful for reverse-Z and shadow cascades.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   static mat4x4 infinitePerspective({
     required double fovY,
     required double aspect,
@@ -461,6 +555,9 @@ final class mat4x4 extends mat {
   }
 
   /// Orthographic projection (right-handed, depth [0, 1]).
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   static mat4x4 ortho({
     required double left,
     required double right,
@@ -481,6 +578,9 @@ final class mat4x4 extends mat {
   }
 
   /// Right-handed lookAt view matrix. Camera looks down -Z.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   static mat4x4 lookAt({
     required vec3 eye,
     required vec3 target,
@@ -502,23 +602,49 @@ final class mat4x4 extends mat {
     );
   }
 
+  /// Compose rotation quaternion + translation into a mat4x4.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  static mat4x4 rotationTranslation(quat r, vec3 t) {
+    final x2 = r.x + r.x, y2 = r.y + r.y, z2 = r.z + r.z;
+    final xx = r.x * x2, xy = r.x * y2, xz = r.x * z2;
+    final yy = r.y * y2, yz = r.y * z2, zz = r.z * z2;
+    final wx = r.w * x2, wy = r.w * y2, wz = r.w * z2;
+    return mat4x4(
+      vec4(1.0 - (yy + zz), xy + wz, xz - wy, 0),
+      vec4(xy - wz, 1.0 - (xx + zz), yz + wx, 0),
+      vec4(xz + wy, yz - wx, 1.0 - (xx + yy), 0),
+      vec4(t.x, t.y, t.z, 1),
+    );
+  }
+
   /// Translation matrix.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   static mat4x4 translation(vec3 t) => mat4x4(
-    vec4(1, 0, 0, 0),
-    vec4(0, 1, 0, 0),
-    vec4(0, 0, 1, 0),
-    vec4(t.x, t.y, t.z, 1),
-  );
+        vec4(1, 0, 0, 0),
+        vec4(0, 1, 0, 0),
+        vec4(0, 0, 1, 0),
+        vec4(t.x, t.y, t.z, 1),
+      );
 
   /// Scaling matrix.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   static mat4x4 scaling(vec3 s) => mat4x4(
-    vec4(s.x, 0, 0, 0),
-    vec4(0, s.y, 0, 0),
-    vec4(0, 0, s.z, 0),
-    vec4(0, 0, 0, 1),
-  );
+        vec4(s.x, 0, 0, 0),
+        vec4(0, s.y, 0, 0),
+        vec4(0, 0, s.z, 0),
+        vec4(0, 0, 0, 1),
+      );
 
   /// Rotation around X axis. [angle] in radians.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   static mat4x4 rotationX(double angle) {
     final c = math.cos(angle);
     final s = math.sin(angle);
@@ -531,6 +657,9 @@ final class mat4x4 extends mat {
   }
 
   /// Rotation around Y axis. [angle] in radians.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   static mat4x4 rotationY(double angle) {
     final c = math.cos(angle);
     final s = math.sin(angle);
@@ -543,6 +672,9 @@ final class mat4x4 extends mat {
   }
 
   /// Rotation around Z axis. [angle] in radians.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   static mat4x4 rotationZ(double angle) {
     final c = math.cos(angle);
     final s = math.sin(angle);
@@ -555,6 +687,9 @@ final class mat4x4 extends mat {
   }
 
   /// Rotation around an arbitrary [axis] (must be normalized). [angle] in radians.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   static mat4x4 rotationAxisAngle(vec3 axis, double angle) {
     final c = math.cos(angle);
     final s = math.sin(angle);
@@ -569,6 +704,9 @@ final class mat4x4 extends mat {
   }
 
   /// Compose Translation * Rotation * Scale in one shot.
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  @pragma('dart2js:tryInline')
   static mat4x4 trs(vec3 translation, quat rotation, vec3 scale) {
     // Compute rotation matrix elements from quaternion.
     final x2 = rotation.x + rotation.x;

@@ -35,12 +35,20 @@ final class vec2u extends vecu {
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  vec2u operator *(vec2u other) => vec2u(x * other.x, y * other.y);
+  vec2u operator *(Object o) => switch (o) {
+    vec2u v => vec2u(x * v.x, y * v.y),
+    int s => vec2u(x * s, y * s),
+    _ => throw ArgumentError('vec2u * ${o.runtimeType}'),
+  };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  vec2u operator /(vec2u other) => vec2u(x ~/ other.x, y ~/ other.y);
+  vec2u operator /(Object o) => switch (o) {
+    vec2u v => vec2u(x ~/ v.x, y ~/ v.y),
+    int s => vec2u(x ~/ s, y ~/ s),
+    _ => throw ArgumentError('vec2u / ${o.runtimeType}'),
+  };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
@@ -95,6 +103,9 @@ final class vec2u extends vecu {
   int get hashCode => x.hashCode ^ y.hashCode;
 
   String get display => 'vec2u($x, $y)';
+
+  @override
+  String toString() => display;
 }
 
 /// 3-component unsigned integer vector.
@@ -130,12 +141,20 @@ final class vec3u extends vecu {
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  vec3u operator *(vec3u other) => vec3u(x * other.x, y * other.y, z * other.z);
+  vec3u operator *(Object o) => switch (o) {
+    vec3u v => vec3u(x * v.x, y * v.y, z * v.z),
+    int s => vec3u(x * s, y * s, z * s),
+    _ => throw ArgumentError('vec3u * ${o.runtimeType}'),
+  };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  vec3u operator /(vec3u other) => vec3u(x ~/ other.x, y ~/ other.y, z ~/ other.z);
+  vec3u operator /(Object o) => switch (o) {
+    vec3u v => vec3u(x ~/ v.x, y ~/ v.y, z ~/ v.z),
+    int s => vec3u(x ~/ s, y ~/ s, z ~/ s),
+    _ => throw ArgumentError('vec3u / ${o.runtimeType}'),
+  };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
@@ -190,6 +209,9 @@ final class vec3u extends vecu {
   int get hashCode => x.hashCode ^ y.hashCode ^ z.hashCode;
 
   String get display => 'vec3u($x, $y, $z)';
+
+  @override
+  String toString() => display;
 }
 
 /// 4-component unsigned integer vector.
@@ -226,12 +248,20 @@ final class vec4u extends vecu {
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  vec4u operator *(vec4u other) => vec4u(x * other.x, y * other.y, z * other.z, w * other.w);
+  vec4u operator *(Object o) => switch (o) {
+    vec4u v => vec4u(x * v.x, y * v.y, z * v.z, w * v.w),
+    int s => vec4u(x * s, y * s, z * s, w * s),
+    _ => throw ArgumentError('vec4u * ${o.runtimeType}'),
+  };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  vec4u operator /(vec4u other) => vec4u(x ~/ other.x, y ~/ other.y, z ~/ other.z, w ~/ other.w);
+  vec4u operator /(Object o) => switch (o) {
+    vec4u v => vec4u(x ~/ v.x, y ~/ v.y, z ~/ v.z, w ~/ v.w),
+    int s => vec4u(x ~/ s, y ~/ s, z ~/ s, w ~/ s),
+    _ => throw ArgumentError('vec4u / ${o.runtimeType}'),
+  };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
@@ -286,4 +316,7 @@ final class vec4u extends vecu {
   int get hashCode => x.hashCode ^ y.hashCode ^ z.hashCode ^ w.hashCode;
 
   String get display => 'vec4u($x, $y, $z, $w)';
+
+  @override
+  String toString() => display;
 }

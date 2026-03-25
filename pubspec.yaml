@@ -1,6 +1,6 @@
 name: gm
-description: A simple and fast math library for Dart, inspired by WGSL conventions.
-version: 0.0.1
+description: Fast linear algebra library for Dart.
+version: 0.0.2
 repository: https://github.com/dartgfx/gm
 
 environment:

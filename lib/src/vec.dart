@@ -17,7 +17,8 @@ sealed class vec {
 sealed class vecf extends vec {
   const vecf();
 
-  double get magnitude;
+  double get length;
+  double get lengthSquared;
   vecf get normalized;
   double dotWith(covariant vecf other);
   double distanceTo(covariant vecf other);
@@ -54,6 +55,11 @@ sealed class vecb extends vec {
   /// Component-wise logical NOT.
   vecb get not;
 }
+
+@pragma('vm:prefer-inline')
+@pragma('wasm:prefer-inline')
+@pragma('dart2js:tryInline')
+double _safeInv(double x) => x > 0 ? 1.0 / x : 0.0;
 
 @pragma('vm:prefer-inline')
 @pragma('wasm:prefer-inline')

@@ -35,12 +35,20 @@ final class vec2i extends veci {
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  vec2i operator *(vec2i other) => vec2i(x * other.x, y * other.y);
+  vec2i operator *(Object o) => switch (o) {
+    vec2i v => vec2i(x * v.x, y * v.y),
+    int s => vec2i(x * s, y * s),
+    _ => throw ArgumentError('vec2i * ${o.runtimeType}'),
+  };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  vec2i operator /(vec2i other) => vec2i(x ~/ other.x, y ~/ other.y);
+  vec2i operator /(Object o) => switch (o) {
+    vec2i v => vec2i(x ~/ v.x, y ~/ v.y),
+    int s => vec2i(x ~/ s, y ~/ s),
+    _ => throw ArgumentError('vec2i / ${o.runtimeType}'),
+  };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
@@ -90,6 +98,9 @@ final class vec2i extends veci {
   int get hashCode => x.hashCode ^ y.hashCode;
 
   String get display => 'vec2i($x, $y)';
+
+  @override
+  String toString() => display;
 }
 
 /// 3-component signed integer vector.
@@ -125,12 +136,20 @@ final class vec3i extends veci {
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  vec3i operator *(vec3i other) => vec3i(x * other.x, y * other.y, z * other.z);
+  vec3i operator *(Object o) => switch (o) {
+    vec3i v => vec3i(x * v.x, y * v.y, z * v.z),
+    int s => vec3i(x * s, y * s, z * s),
+    _ => throw ArgumentError('vec3i * ${o.runtimeType}'),
+  };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  vec3i operator /(vec3i other) => vec3i(x ~/ other.x, y ~/ other.y, z ~/ other.z);
+  vec3i operator /(Object o) => switch (o) {
+    vec3i v => vec3i(x ~/ v.x, y ~/ v.y, z ~/ v.z),
+    int s => vec3i(x ~/ s, y ~/ s, z ~/ s),
+    _ => throw ArgumentError('vec3i / ${o.runtimeType}'),
+  };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
@@ -180,6 +199,9 @@ final class vec3i extends veci {
   int get hashCode => x.hashCode ^ y.hashCode ^ z.hashCode;
 
   String get display => 'vec3i($x, $y, $z)';
+
+  @override
+  String toString() => display;
 }
 
 /// 4-component signed integer vector.
@@ -216,12 +238,20 @@ final class vec4i extends veci {
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  vec4i operator *(vec4i other) => vec4i(x * other.x, y * other.y, z * other.z, w * other.w);
+  vec4i operator *(Object o) => switch (o) {
+    vec4i v => vec4i(x * v.x, y * v.y, z * v.z, w * v.w),
+    int s => vec4i(x * s, y * s, z * s, w * s),
+    _ => throw ArgumentError('vec4i * ${o.runtimeType}'),
+  };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   @pragma('dart2js:tryInline')
-  vec4i operator /(vec4i other) => vec4i(x ~/ other.x, y ~/ other.y, z ~/ other.z, w ~/ other.w);
+  vec4i operator /(Object o) => switch (o) {
+    vec4i v => vec4i(x ~/ v.x, y ~/ v.y, z ~/ v.z, w ~/ v.w),
+    int s => vec4i(x ~/ s, y ~/ s, z ~/ s, w ~/ s),
+    _ => throw ArgumentError('vec4i / ${o.runtimeType}'),
+  };
 
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
@@ -271,4 +301,7 @@ final class vec4i extends veci {
   int get hashCode => x.hashCode ^ y.hashCode ^ z.hashCode ^ w.hashCode;
 
   String get display => 'vec4i($x, $y, $z, $w)';
+
+  @override
+  String toString() => display;
 }

@@ -39,6 +39,9 @@ final class vec2b extends vecb {
   int get hashCode => x.hashCode ^ y.hashCode;
 
   String get display => 'vec2b($x, $y)';
+
+  @override
+  String toString() => display;
 }
 
 /// 3-component boolean vector.
@@ -82,6 +85,9 @@ final class vec3b extends vecb {
   int get hashCode => x.hashCode ^ y.hashCode ^ z.hashCode;
 
   String get display => 'vec3b($x, $y, $z)';
+
+  @override
+  String toString() => display;
 }
 
 /// 4-component boolean vector.
@@ -132,4 +138,7 @@ final class vec4b extends vecb {
   int get hashCode => x.hashCode ^ y.hashCode ^ z.hashCode ^ w.hashCode;
 
   String get display => 'vec4b($x, $y, $z, $w)';
+
+  @override
+  String toString() => display;
 }
